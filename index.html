@@ -162,7 +162,6 @@
   .logo{display:block;height:var(--lh,54px);width:auto;aspect-ratio:694.59/262.55;flex:none}
   .bsep{width:1px;height:calc(var(--lh) * 0.31);margin-bottom:calc(var(--lh) * 0.1638);background:var(--line);flex:none}
   @media (max-width:480px){ .brandwrap{--lh:40px;gap:10px} .brandwrap .brand{font-size:15px} }
-  .lglogo{height:64px;margin:-6px 0 10px -8px;align-self:flex-start}
   .seg{display:inline-flex;background:var(--soft);border-radius:99px;padding:4px;margin:0 0 16px;gap:4px}
   .segb{border:0;background:transparent;color:var(--muted);font:600 14px inherit;font-family:inherit;padding:8px 16px;border-radius:99px;cursor:pointer;transition:background .15s,color .15s}
   .segb.on{background:var(--accent);color:var(--on-accent)}
@@ -781,35 +780,58 @@ HK_BOOT.push(function(){
 </script>
 <div id="login" hidden>
   <form class="lgcard" id="lgform" autocomplete="on" novalidate>
-    <svg class="logo lglogo" role="img" aria-label="tk.connect"><use href="#tklogo"/></svg>
-    <span class="brand">Heizkörper<b>Katalog</b></span>
+    <div class="lghead">
+      <span class="brandwrap"><svg class="logo" role="img" aria-label="tk.connect"><use href="#tklogo"/></svg><span class="bsep" aria-hidden="true"></span><span class="brand">Heizkörper<b>Katalog</b></span></span>
+    </div>
     <h2>Anmelden</h2>
-    <p class="lgsub">Der Katalog ist nur für freigeschaltete Nutzer.</p>
-    <label class="lbl" for="lgmail">E-Mail</label>
-    <input id="lgmail" name="email" type="email" autocomplete="username" required>
-    <label class="lbl" for="lgpw">Passwort</label>
-    <input id="lgpw" name="password" type="password" autocomplete="current-password" required>
+    <p class="lgsub">Melde dich mit deinem Zugang an, um den Katalog zu öffnen.</p>
+    <div class="fld">
+      <label class="lbl" for="lgmail">E-Mail</label>
+      <input id="lgmail" name="email" type="email" autocomplete="username" placeholder="name@firma.de" required>
+    </div>
+    <div class="fld">
+      <label class="lbl" for="lgpw">Passwort</label>
+      <div class="pwwrap">
+        <input id="lgpw" name="password" type="password" autocomplete="current-password" placeholder="Passwort" required>
+        <button type="button" class="pwtog" id="pwtog" aria-label="Passwort anzeigen" aria-pressed="false">Anzeigen</button>
+      </div>
+    </div>
     <p class="lgerr" id="lgerr" role="alert"></p>
-    <button class="lgbtn" id="lgbtn" type="submit">Anmelden</button>
-    <p class="lghint">Kein Zugang oder Passwort vergessen? Bitte beim Administrator melden.</p>
+    <button class="lgbtn" id="lgbtn" type="submit"><span id="lgbtntx">Anmelden</span> <i aria-hidden="true">→</i></button>
+    <p class="lghint"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="3" y="7" width="10" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Geschützter Bereich. Kein Zugang oder Passwort vergessen? Bitte beim Administrator melden.</p>
   </form>
 </div>
 <style>
   .toprt{display:inline-flex;gap:8px;align-items:center}
   #login[hidden],#logout[hidden]{display:none !important}
-  #login{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg, #eef4fc);background:linear-gradient(160deg,#f5f9ff 0%,#dce9fb 55%,#b9d1f3 100%)}
+  #login{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto;background:linear-gradient(160deg,#f5f9ff 0%,#dce9fb 55%,#b9d1f3 100%)}
   @media (prefers-color-scheme: dark){ #login{background:linear-gradient(160deg,#0b1424 0%,#0f2140 60%,#16325e 100%)} }
-  .lgcard{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:28px;padding:28px 26px;box-shadow:var(--shadow);display:flex;flex-direction:column}
-  .lgcard .brand{margin-bottom:18px}
-  .lgcard h2{font-size:30px;font-weight:300;letter-spacing:-.02em;margin:0 0 4px;color:var(--ink)}
-  .lgsub{color:var(--muted);font-size:14px;margin:0 0 18px}
-  .lgcard .lbl{margin-top:10px}
-  .lgcard input{font:500 16px inherit;font-family:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);margin-top:6px;outline:none;transition:border-color .15s}
-  .lgcard input:focus{border-color:var(--accent)}
-  .lgerr{min-height:20px;color:#c0392b;font-size:14px;margin:10px 0 4px}
-  .lgbtn{border:0;border-radius:99px;padding:13px 18px;font:600 15px inherit;font-family:inherit;background:var(--accent);color:var(--on-accent);cursor:pointer}
-  .lgbtn:disabled{opacity:.6;cursor:wait}
-  .lghint{color:var(--muted);font-size:12px;margin:14px 0 0;text-align:center}
+  .lgcard{width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);border-radius:28px;padding:30px 30px 26px;box-shadow:var(--shadow);display:flex;flex-direction:column;animation:rise .25s ease}
+  .lghead{padding-bottom:20px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+  .lghead .brandwrap{--lh:46px}
+  .lghead .logo{margin-left:-3px}
+  .lghead .brand{font-size:17px}
+  .lgcard h2{font-size:28px;font-weight:300;letter-spacing:-.02em;margin:0 0 6px;color:var(--ink)}
+  .lgsub{color:var(--muted);font-size:14px;line-height:1.5;margin:0 0 20px}
+  .fld{display:flex;flex-direction:column;margin-bottom:14px}
+  .fld .lbl{margin:0 0 7px}
+  .lgcard input{width:100%;font:500 16px inherit;font-family:inherit;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);outline:none;transition:border-color .15s, box-shadow .15s}
+  .lgcard input::placeholder{color:var(--muted);opacity:.7}
+  .lgcard input:focus{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 15%, transparent)}
+  .pwwrap{position:relative}
+  .pwwrap input{padding-right:96px}
+  .pwtog{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:var(--soft);color:var(--accent);font:600 12px inherit;font-family:inherit;padding:7px 11px;border-radius:99px;cursor:pointer}
+  .pwtog:hover{background:var(--accent);color:var(--on-accent)}
+  .lgerr{min-height:20px;color:#c0392b;font-size:14px;margin:2px 0 10px}
+  .lgerr:empty{min-height:0;margin:0 0 10px}
+  .lgbtn{display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:99px;padding:14px 18px;font:600 15px inherit;font-family:inherit;background:var(--accent);color:var(--on-accent);cursor:pointer;transition:transform .15s, box-shadow .15s, opacity .15s}
+  .lgbtn:hover:not(:disabled){transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+  .lgbtn i{font-style:normal;transition:transform .15s}
+  .lgbtn:hover:not(:disabled) i{transform:translateX(3px)}
+  .lgbtn:disabled{opacity:.65;cursor:wait}
+  .lghint{display:flex;gap:8px;align-items:flex-start;color:var(--muted);font-size:12px;line-height:1.5;margin:18px 0 0}
+  .lghint svg{width:14px;height:14px;flex:none;margin-top:2px}
+  @media (max-width:480px){ .lgcard{padding:24px 20px 22px;border-radius:24px} .lghead .brandwrap{--lh:40px} .lghead .brand{font-size:15px} }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o" crossorigin="anonymous"></script>
 <script>
@@ -830,7 +852,10 @@ HK_BOOT.push(function(){
       box.hidden = true; out.hidden = false; run(); document.body.classList.add('hk-ok');
     });
   }
-  function zeigeLogin(msg){ box.hidden = false; err.textContent = msg || ''; btn.disabled = false; document.getElementById('lgmail').focus(); }
+  var btx = document.getElementById('lgbtntx');
+  function zeigeLogin(msg){ box.hidden = false; err.textContent = msg || ''; btn.disabled = false; btx.textContent = 'Anmelden'; var m = document.getElementById('lgmail'); (m.value ? document.getElementById('lgpw') : m).focus(); }
+  var pt = document.getElementById('pwtog'), pwi = document.getElementById('lgpw');
+  pt.addEventListener('click', function(){ var an = pwi.type === 'password'; pwi.type = an ? 'text' : 'password'; pt.textContent = an ? 'Verbergen' : 'Anzeigen'; pt.setAttribute('aria-pressed', an ? 'true' : 'false'); pt.setAttribute('aria-label', an ? 'Passwort verbergen' : 'Passwort anzeigen'); pwi.focus(); });
 
   sb.auth.getSession().then(function(r){
     if(r.data && r.data.session) return laden().catch(function(){ zeigeLogin('Daten konnten nicht geladen werden. Bitte neu anmelden.'); });
@@ -841,7 +866,7 @@ HK_BOOT.push(function(){
     e.preventDefault();
     var mail = document.getElementById('lgmail').value.trim(), pw = document.getElementById('lgpw').value;
     if(!mail || !pw){ err.textContent = 'Bitte E-Mail und Passwort eingeben.'; return; }
-    btn.disabled = true; err.textContent = '';
+    btn.disabled = true; err.textContent = ''; btx.textContent = 'Wird angemeldet …';
     sb.auth.signInWithPassword({ email: mail, password: pw }).then(function(r){
       document.getElementById('lgpw').value = '';
       if(r.error){ zeigeLogin('Anmeldung fehlgeschlagen. Bitte E-Mail und Passwort prüfen.'); return; }
