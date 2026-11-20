@@ -215,7 +215,13 @@
   .bp #callout{opacity:0;transform:translateY(8px);transition:opacity .3s ease,transform .3s ease}
   .bp #callout.on{opacity:1;transform:none}
   @media (max-width:880px){ .visual{order:2} }
-  @media (min-width:881px){ .visual{align-self:start;justify-self:end;width:100%;max-width:470px} }
+  @media (min-width:881px){ .visual{align-self:start;justify-self:end;width:100%} }
+  /* Grosse Bildschirme: ganze Seite stufenweise groesser, damit nichts verloren wirkt */
+  @media (min-width:1500px){ .page{zoom:1.12} }
+  @media (min-width:1700px){ .page{zoom:1.22} }
+  @media (min-width:1900px){ .page{zoom:1.32} }
+  @media (min-width:2300px){ .page{zoom:1.5} }
+  @media (min-width:2800px){ .page{zoom:1.8} }
 </style>
 <style>body:not(.hk-ok) .page{visibility:hidden}</style>
 </head>
@@ -720,7 +726,8 @@ HK_BOOT.push(function(){
     if(!v||!r) return;
     v.style.height=''; v.style.marginTop='';
     if(window.innerWidth<=880) return;
-    var top=v.getBoundingClientRect().top, bot=r.getBoundingClientRect().bottom, H=Math.min(360,bot-top);
+    var z=v.currentCSSZoom||1;   /* bei .page{zoom} liefert getBoundingClientRect Bildschirm-Pixel */
+    var top=v.getBoundingClientRect().top/z, bot=r.getBoundingClientRect().bottom/z, H=Math.min(400,bot-top);
     if(H>200){ v.style.height=H+'px'; v.style.marginTop=(bot-top-H)+'px'; }
   }
   window.addEventListener('load',fit); window.addEventListener('resize',fit);
@@ -939,6 +946,25 @@ HK_BOOT.push(function(){
     else L = 'Länge';
     bild(k.id, L, h);
   }
+  /* Ausschnitt automatisch auf die Zeichnung zuschneiden, damit sie die Karte ausfuellt (Seitenverhaeltnis 3:2) */
+  var svg=front.ownerSVGElement;
+  function fitView(){
+    try{
+      var x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+      ['front','sect','dims','tdim','callpos'].forEach(function(id){
+        var el=document.getElementById(id); if(!el) return;
+        var b=el.getBBox(); if(!b.width && !b.height) return;
+        var dx=0, dy=0, m=/translate\(([-\d.]+)[ ,]+([-\d.]+)\)/.exec(el.getAttribute('transform')||'');
+        if(m){ dx=+m[1]; dy=+m[2]; }
+        x0=Math.min(x0,b.x+dx); y0=Math.min(y0,b.y+dy); x1=Math.max(x1,b.x+b.width+dx); y1=Math.max(y1,b.y+b.height+dy);
+      });
+      if(x1<=x0) return;
+      var pad=14, w=Math.max(360,x1-x0+2*pad), h=y1-y0+2*pad, cx=(x0+x1)/2, cy=(y0+y1)/2;
+      if(w/h<1.5) w=h*1.5; else h=w/1.5;
+      svg.setAttribute('viewBox',[Math.round(cx-w/2),Math.round(cy-h/2),Math.round(w),Math.round(h)].join(' '));
+    }catch(e){}
+  }
+  var draw0=draw; draw=function(s){ draw0(s); fitView(); };
   document.addEventListener('heizkoerper:schritt', function(e){ draw(e.detail); });
   document.addEventListener('heizkoerper:gewaehlt', function(e){ if(e.detail && e.detail.sel) draw(e.detail.sel); });
   var rs=document.getElementById('reset'); if(rs) rs.addEventListener('click', function(){ draw(null); });
