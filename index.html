@@ -217,11 +217,11 @@
   @media (max-width:880px){ .visual{order:2} }
   @media (min-width:881px){ .visual{align-self:start;justify-self:end;width:100%} }
   /* Grosse Bildschirme: ganze Seite stufenweise groesser, damit nichts verloren wirkt */
-  @media (min-width:1500px){ .page{zoom:1.06} }
-  @media (min-width:1700px){ .page{zoom:1.11} }
-  @media (min-width:1900px){ .page{zoom:1.16} }
-  @media (min-width:2300px){ .page{zoom:1.25} }
-  @media (min-width:2800px){ .page{zoom:1.4} }
+  /* abgestimmt: 1877 px Bildschirm bei 100 % soll aussehen wie vorher bei 90 % Browser-Zoom (0,9 x 1,16 = 1,04) */
+  @media (min-width:1700px){ .page{zoom:1.04} }
+  @media (min-width:2100px){ .page{zoom:1.12} }
+  @media (min-width:2500px){ .page{zoom:1.22} }
+  @media (min-width:3000px){ .page{zoom:1.35} }
 </style>
 <style>body:not(.hk-ok) .page{visibility:hidden}</style>
 </head>
