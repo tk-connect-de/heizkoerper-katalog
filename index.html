@@ -759,7 +759,7 @@ HK_BOOT.push(function(){
     <div class="info">
       <p class="lead2">Die europäische Norm für Heizkörper. Sie legt fest, wie die Wärmeleistung eines Heizkörpers gemessen wird, damit Werte verschiedener Hersteller vergleichbar sind.</p>
       <div class="v-norm">
-        <div class="kv"><div><b>75 °C</b><span>Vorlauftemperatur</span></div><div><b>65 °C</b><span>Rücklauftemperatur</span></div><div><b>20 °C</b><span>Raumtemperatur</span></div></div>
+        <div class="kv"><div><b>75 °C</b><span>Vorlauf<em>temperatur</em></span></div><div><b>65 °C</b><span>Rücklauf<em>temperatur</em></span></div><div><b>20 °C</b><span>Raum<em>temperatur</em></span></div></div>
         <h3>Was bedeutet 75/65/20?</h3>
         <p>Der Heizkörper wird im Prüfraum mit 75&nbsp;°C Wasser versorgt, das mit 65&nbsp;°C zurückkommt, bei 20&nbsp;°C Raumtemperatur. Die dabei gemessene Leistung ist die <b>Normwärmeleistung</b> in Watt. Daraus ergibt sich eine mittlere Übertemperatur von 49,8&nbsp;K.</p>
         <h3>Warum ist das wichtig?</h3>
@@ -768,7 +768,7 @@ HK_BOOT.push(function(){
         <p>Die Normleistung bei 75/65/20&nbsp;°C: bei Flach- und Badheizkörpern je Größe, bei Guss-, Stahlrohr- und Stahlradiatoren je Glied (mit Gliederzahl multipliziert).</p>
       </div>
       <div class="v-wp" hidden>
-        <div class="kv"><div><b>55 °C</b><span>Vorlauftemperatur</span></div><div><b>45 °C</b><span>Rücklauftemperatur</span></div><div><b>20 °C</b><span>Raumtemperatur</span></div></div>
+        <div class="kv"><div><b>55 °C</b><span>Vorlauf<em>temperatur</em></span></div><div><b>45 °C</b><span>Rücklauf<em>temperatur</em></span></div><div><b>20 °C</b><span>Raum<em>temperatur</em></span></div></div>
         <h3>Was bedeutet 55/45/20?</h3>
         <p>Vorlauf 55&nbsp;°C, Rücklauf 45&nbsp;°C, Raum 20&nbsp;°C. Solche niedrigen Temperaturen sind typisch für Wärmepumpen und moderne Heizungen. Die mittlere Übertemperatur liegt bei 29,7&nbsp;K statt 49,8&nbsp;K bei der Norm, deshalb gibt der Heizkörper deutlich weniger Wärme ab.</p>
         <h3>Wie wird gerechnet?</h3>
@@ -796,6 +796,17 @@ HK_BOOT.push(function(){
   .info .kv div{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 10px;text-align:center}
   .info .kv b{display:block;font-size:26px;font-weight:300;letter-spacing:-.02em}
   .info .kv span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .info .kv{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .info .kv div{min-width:0}
+  .info .kv span em{font-style:normal}
+  @media (max-width:600px){
+    .info .kv{gap:6px}
+    .info .kv div{padding:10px 4px;border-radius:14px}
+    .info .kv b{font-size:20px}
+    .info .kv span{display:block;font-size:10px;letter-spacing:.08em}
+    .info .kv span em{display:none}   /* Handy: nur "Vorlauf", "Rücklauf", "Raum" */
+    .info .formula{font-size:16px;padding:12px}
+  }
 </style>
 <script>
 (function(){
