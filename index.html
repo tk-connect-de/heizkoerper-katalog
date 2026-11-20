@@ -563,6 +563,7 @@ HK_BOOT.push(function(){
       var rowM = k.hoehen[String(sel.hoehe)], cm = document.createElement('div'); cm.className='chips';
       Object.keys(rowM).map(Number).sort(function(a,b){return a-b}).forEach(function(v){
         var w = rowM[String(v)];
+        if(w == null) return;   /* nicht lieferbar: gar nicht anzeigen */
         var sj = k.saeulen_je_tiefe && k.saeulen_je_tiefe[String(v)];
         var lbl = sj ? sj+' Säulen' : (k.merkmal==='saeulen' ? v+' Säulen' : v+' mm');
         var sub = (w==null ? 'nicht verfügbar' : fmt(cvG(w))+' W / Glied') + (sj ? ' · Tiefe '+v+' mm' : '');
@@ -617,6 +618,7 @@ HK_BOOT.push(function(){
       var arr = sel.typ.hoehen[String(sel.hoehe)], c2 = document.createElement('div'); c2.className='chips';
       sel.typ.laengen_mm.forEach(function(L, i){
         var w = arr[i];
+        if(w == null) return;   /* nicht lieferbar: gar nicht anzeigen */
         c2.appendChild(chipBtn(L+' mm', w==null ? 'nicht lieferbar' : fmtE(cvT(w))+' W', function(){ sel.laenge = L; finish(w); }, w==null));
       });
       body.appendChild(c2); return;
@@ -626,6 +628,7 @@ HK_BOOT.push(function(){
       var row = k.hoehen[String(sel.hoehe)], c3 = document.createElement('div'); c3.className='chips';
       Object.keys(row).map(Number).sort(function(a,b){return a-b}).forEach(function(b){
         var w = row[String(b)];
+        if(w == null) return;   /* kein Wert: gar nicht anzeigen */
         c3.appendChild(chipBtn(b+' mm', w==null ? 'kein Wert' : fmtE(cvT(w))+' W', function(){ sel.breite = b; finish(w); }, w==null));
       });
       body.appendChild(c3); return;
