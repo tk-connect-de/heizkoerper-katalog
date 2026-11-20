@@ -33,20 +33,18 @@
     }
   }
   *{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%;background:var(--bg2)}   /* Farbe auch beim Ueberscrollen oben/unten am Handy */
-  @media (max-width:880px){
-    /* Handy: fester Hintergrund wird von mobilen Browsern ignoriert, deshalb ueber die volle Hoehe ziehen */
-    body{background-attachment:scroll;min-height:100dvh}
-  }
+  html{-webkit-text-size-adjust:100%;background:var(--bg2)}
   body{
     margin:0; color:var(--ink); min-height:100vh;
     font:16px/1.5 "Plus Jakarta Sans","Segoe UI Variable","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
-    background:
-      radial-gradient(900px 520px at 12% -8%, rgba(255,255,255,.95), transparent 62%),
-      radial-gradient(700px 500px at 100% 100%, rgba(47,123,232,.28), transparent 60%),
-      linear-gradient(165deg,var(--bg1),var(--bg2) 55%,var(--bg3));
-    background-attachment:fixed;
   }
+  /* Hintergrund als feste Ebene hinter der Seite: bleibt beim Federn am iPhone stehen und ragt oben/unten
+     ueber den Bildschirm hinaus, dadurch kein sichtbarer Uebergang beim Ueberscrollen */
+  body::after{content:"";position:fixed;left:0;right:0;top:-140px;bottom:-140px;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(900px 520px at 12% 132px, rgba(255,255,255,.95), transparent 62%),
+      radial-gradient(700px 500px at 100% calc(100% - 140px), rgba(47,123,232,.28), transparent 60%),
+      linear-gradient(165deg,var(--bg1),var(--bg1) 9%,var(--bg2) 55%,var(--bg3) 91%,var(--bg3))}
   @media (prefers-color-scheme: dark) and (min-width:100000px){
     body{ background:
       radial-gradient(900px 520px at 12% -8%, rgba(60,120,220,.35), transparent 62%),
