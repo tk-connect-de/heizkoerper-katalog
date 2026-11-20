@@ -167,6 +167,14 @@
   .seg{display:inline-flex;background:var(--soft);border-radius:99px;padding:4px;margin:0 0 16px;gap:4px}
   .segb{border:0;background:transparent;color:var(--muted);font:600 14px inherit;font-family:inherit;padding:8px 16px;border-radius:99px;cursor:pointer;transition:background .15s,color .15s}
   .segb.on{background:var(--accent);color:var(--on-accent)}
+  .cond{display:flex;align-items:center;justify-content:space-between;gap:10px 14px;flex-wrap:wrap;margin:0 0 14px}
+  .cond .seg{margin:0;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm)}
+  .nexp{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);transition:opacity .15s}
+  .nexp input{width:60px;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:600 14px inherit;font-family:inherit;text-align:center;outline:none}
+  .nexp input:focus{border-color:var(--accent)}
+  .nexp input.bad{border-color:#c0392b}
+  .cond.isnorm .nexp{opacity:.45}
+  .bedinfo{margin:4px 4px 0;color:var(--muted);font-size:13px;min-height:18px}
   .bp .body{fill:var(--bp-fill);stroke:currentColor;stroke-width:2}
   .bp .thin{stroke:currentColor;fill:none;stroke-width:1.3}
   .bp .dim{stroke:var(--accent);fill:none;stroke-width:1.3}
@@ -194,6 +202,13 @@
       <h1><span>Heizkörper</span><span class="it">Katalog</span></h1>
       <p class="lead">Art, Typ und Maße wählen und die Normleistung erscheint sofort. Klar, schnell und für den Baustellenalltag gemacht.</p>
 
+      <div class="cond" id="cond">
+        <div class="seg" role="radiogroup" aria-label="Auslegungstemperaturen">
+          <button type="button" class="segb" data-bed="norm" role="radio" aria-checked="true">75/65/20 °C</button>
+          <button type="button" class="segb" data-bed="wp" role="radio" aria-checked="false">55/45/20 °C</button>
+        </div>
+        <label class="nexp" for="nexp" title="Heizkörperexponent n, meist 1,3. Genauer Wert steht im Datenblatt des Herstellers.">Exponent n <input id="nexp" type="text" inputmode="decimal" value="1,3" autocomplete="off"></label>
+      </div>
       <div class="result" id="field">
         <label class="lbl" for="watt">Heizleistung</label>
         <div class="num">
@@ -203,6 +218,7 @@
         <span class="cta"><span id="ctatx">Heizkörper wählen</span> <i>→</i></span>
       </div>
       <div class="summary" id="summary"></div>
+      <div class="bedinfo" id="bedinfo"></div>
       <div class="row"><button class="ghost" id="copy" type="button" hidden>Ergebnis kopieren</button><button class="ghost" id="reset" type="button" hidden>Zurücksetzen</button></div>
 
       <div class="stats" id="stats"></div>
@@ -275,6 +291,15 @@ HK_BOOT.push(function(){
   var hist = [];
 
   function fmt(n){ return Number(n).toLocaleString('de-DE', {maximumFractionDigits:1}); }
+  /* Umrechnung nach DIN EN 442 (logarithmische Uebertemperatur) */
+  var BED = { norm:{t:'75/65/20 °C', vl:75, rl:65, ti:20}, wp:{t:'55/45/20 °C', vl:55, rl:45, ti:20} };
+  function dtLog(b){ return (b.vl - b.rl) / Math.log((b.vl - b.ti) / (b.rl - b.ti)); }
+  var DT0 = dtLog(BED.norm), cfg = {bed:'norm', n:1.3}, last = null;
+  try{ var gs = JSON.parse(localStorage.getItem('hk_cfg') || 'null'); if(gs && BED[gs.bed]) cfg.bed = gs.bed; if(gs && gs.n >= 1 && gs.n <= 2) cfg.n = gs.n; }catch(e){}
+  function faktor(){ return cfg.bed === 'norm' ? 1 : Math.pow(dtLog(BED[cfg.bed]) / DT0, cfg.n); }
+  function cvG(w){ return w == null ? w : (cfg.bed === 'norm' ? w : Math.round(w * faktor() * 10) / 10); }   /* je Glied, 1 Nachkommastelle */
+  function cvT(w){ return w == null ? w : (cfg.bed === 'norm' ? w : Math.round(w * faktor())); }             /* Gesamtleistung, ganze Watt */
+  function nTxt(){ return String(cfg.n).replace('.', ','); }
   function katAvail(k){ return k.status !== 'folgt'; }
 
   /* ---------- Zeichnungen (eigene Strichzeichnungen, viewBox 120 x 80) ---------- */
@@ -465,7 +490,7 @@ HK_BOOT.push(function(){
         var w = rowM[String(v)];
         var sj = k.saeulen_je_tiefe && k.saeulen_je_tiefe[String(v)];
         var lbl = sj ? sj+' Säulen' : (k.merkmal==='saeulen' ? v+' Säulen' : v+' mm');
-        var sub = (w==null ? 'nicht verfügbar' : fmt(w)+' W / Glied') + (sj ? ' · Tiefe '+v+' mm' : '');
+        var sub = (w==null ? 'nicht verfügbar' : fmt(cvG(w))+' W / Glied') + (sj ? ' · Tiefe '+v+' mm' : '');
         cm.appendChild(chipBtn(lbl, sub, function(){ sel.merk = v; sel.wGlied = w; go('glieder'); }, w==null));
       });
       body.appendChild(cm); return;
@@ -495,7 +520,7 @@ HK_BOOT.push(function(){
         var n = count();
         if(!n){ $('glres').textContent = 'Bitte Werte eingeben'; return 0; }
         var pre = mode === 2 ? String(num(bl)).replace('.', ',') + ' mm ÷ ' + String(teil()).replace('.', ',') + ' mm = ' + n + ' Glieder · ' : '';
-        $('glres').textContent = pre + fmt(sel.wGlied) + ' W × ' + n + ' = ' + fmt(Math.round(sel.wGlied * n * 10) / 10) + ' W';
+        $('glres').textContent = pre + fmt(cvG(sel.wGlied)) + ' W × ' + n + ' = ' + fmt(cvT(Math.round(sel.wGlied * n * 10) / 10)) + ' W' + (cfg.bed === 'norm' ? '' : ' bei ' + BED[cfg.bed].t);
         return n;
       }
       function setMode(m){ mode = m; $('m1').classList.toggle('on', m===1); $('m2').classList.toggle('on', m===2); $('p1').hidden = m!==1; $('p2').hidden = m!==2; upd(); (m===1?inp:bl).focus(); }
@@ -517,7 +542,7 @@ HK_BOOT.push(function(){
       var arr = sel.typ.hoehen[String(sel.hoehe)], c2 = document.createElement('div'); c2.className='chips';
       sel.typ.laengen_mm.forEach(function(L, i){
         var w = arr[i];
-        c2.appendChild(chipBtn(L+' mm', w==null ? 'nicht lieferbar' : fmt(w)+' W', function(){ sel.laenge = L; finish(w); }, w==null));
+        c2.appendChild(chipBtn(L+' mm', w==null ? 'nicht lieferbar' : fmt(cvT(w))+' W', function(){ sel.laenge = L; finish(w); }, w==null));
       });
       body.appendChild(c2); return;
     }
@@ -526,16 +551,27 @@ HK_BOOT.push(function(){
       var row = k.hoehen[String(sel.hoehe)], c3 = document.createElement('div'); c3.className='chips';
       Object.keys(row).map(Number).sort(function(a,b){return a-b}).forEach(function(b){
         var w = row[String(b)];
-        c3.appendChild(chipBtn(b+' mm', w==null ? 'kein Wert' : fmt(w)+' W', function(){ sel.breite = b; finish(w); }, w==null));
+        c3.appendChild(chipBtn(b+' mm', w==null ? 'kein Wert' : fmt(cvT(w))+' W', function(){ sel.breite = b; finish(w); }, w==null));
       });
       body.appendChild(c3); return;
     }
   }
 
-  function finish(w){
-    closeDlg();
+  function zeige(){
+    if(!last) return;
+    var w = cvT(last.norm), b = BED[cfg.bed];
     $('watt').value = fmt(w);
     $('watt').dataset.value = String(w);
+    $('watt').dataset.norm = String(last.norm);
+    $('summary').textContent = last.parts.join(' · ');
+    $('bedinfo').textContent = cfg.bed === 'norm'
+      ? 'Normleistung bei ' + b.t
+      : 'Bei ' + b.t + ' mit Exponent n = ' + nTxt() + ' · Normleistung ' + fmt(last.norm) + ' W bei 75/65/20 °C';
+    document.dispatchEvent(new CustomEvent('heizkoerper:gewaehlt', {detail:{watt:w, norm:last.norm, temperaturen:b.t, exponent:cfg.n, auswahl:last.parts, sel:last.sel}}));
+  }
+
+  function finish(w){
+    closeDlg();
     var parts = [sel.kat.name];
     if(sel.typ) parts.push('Typ '+sel.typ.typ);
     parts.push('Höhe '+sel.hoehe+' mm');
@@ -543,10 +579,32 @@ HK_BOOT.push(function(){
     if(sel.breite) parts.push('Breite '+sel.breite+' mm');
     if(sel.merk) parts.push(merkLabel(sel.kat, sel.merk));
     if(sel.glieder) parts.push(sel.baulaenge ? 'Baulänge '+String(sel.baulaenge).replace('.', ',')+' mm ÷ '+String(sel.teilung).replace('.', ',')+' mm = '+sel.glieder+' Glieder' : sel.glieder+' Glieder');
-    $('summary').textContent = parts.join(' · ');
+    last = {norm:w, parts:parts, sel:sel};
     $('reset').hidden = false; $('copy').hidden = false; $('ctatx').textContent = 'Auswahl ändern';
-    document.dispatchEvent(new CustomEvent('heizkoerper:gewaehlt', {detail:{watt:w, auswahl:parts, sel:sel}}));
+    zeige();
   }
+
+  /* Auslegung umschalten: 75/65/20 oder 55/45/20, Exponent n */
+  var nIn = $('nexp');
+  function cfgUI(){
+    [].forEach.call(document.querySelectorAll('#cond .segb'), function(x){ var on = x.getAttribute('data-bed') === cfg.bed; x.classList.toggle('on', on); x.setAttribute('aria-checked', on ? 'true' : 'false'); });
+    nIn.disabled = cfg.bed === 'norm';
+    $('cond').classList.toggle('isnorm', cfg.bed === 'norm');
+    var pl = document.querySelector('.pl-lang'); if(pl) pl.textContent = 'DIN EN 442 · ' + BED[cfg.bed].t;
+    try{ localStorage.setItem('hk_cfg', JSON.stringify(cfg)); }catch(e){}
+  }
+  [].forEach.call(document.querySelectorAll('#cond .segb'), function(x){
+    x.addEventListener('click', function(){ cfg.bed = x.getAttribute('data-bed'); cfgUI(); zeige(); });
+  });
+  nIn.value = nTxt();
+  nIn.addEventListener('input', function(){
+    var v = parseFloat(String(nIn.value).replace(',', '.'));
+    var ok = v >= 1 && v <= 2;
+    nIn.classList.toggle('bad', !ok && nIn.value !== '');
+    if(ok){ cfg.n = v; cfgUI(); zeige(); }
+  });
+  nIn.addEventListener('blur', function(){ nIn.value = nTxt(); nIn.classList.remove('bad'); });
+  cfgUI();
 
   $('field').addEventListener('click', open);
   $('watt').addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); }});
@@ -562,10 +620,10 @@ HK_BOOT.push(function(){
     if(step==='glieder'){ delete sel.merk; delete sel.wGlied; delete sel.baulaenge; delete sel.teilung; }
     step = prev; render();
   });
-  $('reset').addEventListener('click', function(e){ e.stopPropagation(); $('watt').value=''; delete $('watt').dataset.value; $('summary').textContent=''; $('reset').hidden=true; $('copy').hidden=true; $('ctatx').textContent='Heizkörper wählen'; });
+  $('reset').addEventListener('click', function(e){ e.stopPropagation(); $('watt').value=''; delete $('watt').dataset.value; $('summary').textContent=''; $('bedinfo').textContent=''; delete $('watt').dataset.norm; last = null; $('reset').hidden=true; $('copy').hidden=true; $('ctatx').textContent='Heizkörper wählen'; });
   $('copy').addEventListener('click', function(e){
     e.stopPropagation();
-    var txt = $('watt').value + ' W · ' + $('summary').textContent + ' (75/65/20 °C)', b = $('copy');
+    var txt = $('watt').value + ' W · ' + $('summary').textContent + ' · ' + $('bedinfo').textContent, b = $('copy');
     function ok(){ b.textContent = 'Kopiert ✓'; b.classList.add('ok'); setTimeout(function(){ b.textContent = 'Ergebnis kopieren'; b.classList.remove('ok'); }, 1600); }
     function alt(){ var ta = document.createElement('textarea'); ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); ok(); }catch(x){} ta.remove(); }
     if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(txt).then(ok, alt); } else { alt(); }
@@ -629,6 +687,10 @@ HK_BOOT.push(function(){
       <h3>Was zeigt dieser Katalog?</h3>
       <p>Die Normleistung bei 75/65/20 °C: bei Flach- und Badheizkörpern je Größe, bei Guss-, Stahlrohr- und Stahlradiatoren je Glied (mit Gliederzahl multiplizieren).</p>
       <p class="small">Die Werte stammen aus Herstellerkatalogen. Online-Rechner arbeiten mit allgemeinen Basisdaten und können deshalb leicht abweichen.</p>
+      <h3>Umrechnung auf 55/45/20 °C</h3>
+      <p>Mit dem Schalter über dem Ergebnis rechnet der Katalog die Normleistung auf 55/45/20 °C um, mit der logarithmischen Übertemperatur nach DIN EN 442 (29,7 K statt 49,8 K):</p>
+      <p class="formula">Q = Q<sub>Norm</sub> · (29,7 / 49,8)<sup>n</sup></p>
+      <p class="small">Der Heizkörperexponent n hängt vom Modell ab und steht im Datenblatt des Herstellers. Üblich sind etwa 1,25 bis 1,35, als Standard ist 1,3 eingestellt. Mit n = 1,3 liefert ein Heizkörper bei 55/45/20 °C rund 51 % seiner Normleistung.</p>
     </div>
   </div>
 </div>
