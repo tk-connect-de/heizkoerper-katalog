@@ -604,6 +604,12 @@ HK_BOOT.push(function(){
     nIn.disabled = cfg.bed === 'norm';
     $('cond').classList.toggle('isnorm', cfg.bed === 'norm');
     var pl = document.querySelector('.pl-lang'); if(pl) pl.textContent = 'DIN EN 442 · ' + BED[cfg.bed].t;
+    var wp = cfg.bed !== 'norm', fWp = Math.pow(dtLog(BED.wp) / DT0, cfg.n);
+    [].forEach.call(document.querySelectorAll('.info .v-norm'), function(x){ x.hidden = wp; });
+    [].forEach.call(document.querySelectorAll('.info .v-wp'), function(x){ x.hidden = !wp; });
+    [].forEach.call(document.querySelectorAll('.info .infoN'), function(x){ x.textContent = nTxt(); });
+    [].forEach.call(document.querySelectorAll('.info .infoF'), function(x){ x.textContent = fWp.toFixed(3).replace('.', ','); });
+    [].forEach.call(document.querySelectorAll('.info .infoP'), function(x){ x.textContent = Math.round(fWp * 100); });
     try{ localStorage.setItem('hk_cfg', JSON.stringify(cfg)); }catch(e){}
   }
   [].forEach.call(document.querySelectorAll('#cond .segb'), function(x){
@@ -657,8 +663,7 @@ HK_BOOT.push(function(){
   var active = D.kategorien.filter(function(k){ return k.status !== 'folgt'; }).length;
   document.getElementById('stats').innerHTML =
     '<div class="stat"><b>'+active+'</b><span>Heizkörperarten</span></div>' +
-    '<div class="stat"><b>'+n.toLocaleString('de-DE')+'</b><span>Werte hinterlegt</span></div>' +
-    '<div class="stat"><b>75/65</b><span>Norm · 20 °C Raum</span></div>';
+    '<div class="stat"><b>'+n.toLocaleString('de-DE')+'</b><span>Werte hinterlegt</span></div>';
 });
 </script>
 <script>
@@ -694,20 +699,27 @@ HK_BOOT.push(function(){
     <div class="dlg-head"><h2 id="infoTitle">DIN EN 442</h2><button class="x" id="infoClose" type="button" aria-label="Schließen">×</button></div>
     <div class="info">
       <p class="lead2">Die europäische Norm für Heizkörper. Sie legt fest, wie die Wärmeleistung eines Heizkörpers gemessen wird, damit Werte verschiedener Hersteller vergleichbar sind.</p>
-      <div class="kv"><div><b>75 °C</b><span>Vorlauftemperatur</span></div><div><b>65 °C</b><span>Rücklauftemperatur</span></div><div><b>20 °C</b><span>Raumtemperatur</span></div></div>
-      <h3>Was bedeutet 75/65/20?</h3>
-      <p>Der Heizkörper wird im Prüfraum mit 75&nbsp;°C Wasser versorgt, das mit 65&nbsp;°C zurückkommt, bei 20&nbsp;°C Raumtemperatur. Die dabei gemessene Leistung ist die <b>Normwärmeleistung</b> in Watt. Daraus ergibt sich eine mittlere Übertemperatur von rund 50&nbsp;K.</p>
-      <h3>Warum ist das wichtig?</h3>
-      <p>Im Katalog stehen alle Werte bei diesen Normbedingungen. Läuft die Heizung später mit anderen Temperaturen (zum Beispiel 55/45 bei Wärmepumpen), liefert der Heizkörper weniger Leistung. Die Umrechnung geht über die Heizkörperformel:</p>
-      <p class="formula">Q = Q<sub>Norm</sub> · (ΔT / 50)<sup>n</sup></p>
-      <p class="small">ΔT = mittlere Übertemperatur im Betrieb, n = Heizkörperexponent (je nach Bauart etwa 1,2 bis 1,4).</p>
-      <h3>Was zeigt dieser Katalog?</h3>
-      <p>Die Normleistung bei 75/65/20 °C: bei Flach- und Badheizkörpern je Größe, bei Guss-, Stahlrohr- und Stahlradiatoren je Glied (mit Gliederzahl multiplizieren).</p>
+      <div class="v-norm">
+        <div class="kv"><div><b>75 °C</b><span>Vorlauftemperatur</span></div><div><b>65 °C</b><span>Rücklauftemperatur</span></div><div><b>20 °C</b><span>Raumtemperatur</span></div></div>
+        <h3>Was bedeutet 75/65/20?</h3>
+        <p>Der Heizkörper wird im Prüfraum mit 75&nbsp;°C Wasser versorgt, das mit 65&nbsp;°C zurückkommt, bei 20&nbsp;°C Raumtemperatur. Die dabei gemessene Leistung ist die <b>Normwärmeleistung</b> in Watt. Daraus ergibt sich eine mittlere Übertemperatur von 49,8&nbsp;K.</p>
+        <h3>Warum ist das wichtig?</h3>
+        <p>Im Katalog stehen alle Werte bei diesen Normbedingungen. Läuft die Heizung mit niedrigeren Temperaturen, zum Beispiel 55/45 bei Wärmepumpen, liefert der Heizkörper weniger Leistung. Dafür gibt es über dem Ergebnis den Schalter <b>55/45/20&nbsp;°C</b>.</p>
+        <h3>Was zeigt dieser Katalog?</h3>
+        <p>Die Normleistung bei 75/65/20&nbsp;°C: bei Flach- und Badheizkörpern je Größe, bei Guss-, Stahlrohr- und Stahlradiatoren je Glied (mit Gliederzahl multipliziert).</p>
+      </div>
+      <div class="v-wp" hidden>
+        <div class="kv"><div><b>55 °C</b><span>Vorlauftemperatur</span></div><div><b>45 °C</b><span>Rücklauftemperatur</span></div><div><b>20 °C</b><span>Raumtemperatur</span></div></div>
+        <h3>Was bedeutet 55/45/20?</h3>
+        <p>Vorlauf 55&nbsp;°C, Rücklauf 45&nbsp;°C, Raum 20&nbsp;°C. Solche niedrigen Temperaturen sind typisch für Wärmepumpen und moderne Heizungen. Die mittlere Übertemperatur liegt bei 29,7&nbsp;K statt 49,8&nbsp;K bei der Norm, deshalb gibt der Heizkörper deutlich weniger Wärme ab.</p>
+        <h3>Wie wird gerechnet?</h3>
+        <p>Hersteller geben die Leistung nur für die Norm 75/65/20&nbsp;°C an. Der Katalog rechnet sie nach DIN EN 442 um:</p>
+        <p class="formula">Q = Q<sub>Norm</sub> · (29,7 / 49,8)<sup>n</sup></p>
+        <p>Mit n = <b class="infoN">1,3</b> ergibt das Q = Q<sub>Norm</sub> · <b class="infoF">0,511</b>, also rund <b class="infoP">51</b>&nbsp;% der Normleistung.</p>
+        <h3>Was ist der Exponent n?</h3>
+        <p class="small">Der Heizkörperexponent hängt vom Modell ab und steht im Datenblatt des Herstellers. Üblich sind etwa 1,25 bis 1,35, als Standard ist 1,3 eingestellt. Du kannst ihn neben dem Schalter ändern.</p>
+      </div>
       <p class="small">Die Werte stammen aus Herstellerkatalogen. Online-Rechner arbeiten mit allgemeinen Basisdaten und können deshalb leicht abweichen.</p>
-      <h3>Umrechnung auf 55/45/20 °C</h3>
-      <p>Mit dem Schalter über dem Ergebnis rechnet der Katalog die Normleistung auf 55/45/20 °C um, mit der logarithmischen Übertemperatur nach DIN EN 442 (29,7 K statt 49,8 K):</p>
-      <p class="formula">Q = Q<sub>Norm</sub> · (29,7 / 49,8)<sup>n</sup></p>
-      <p class="small">Der Heizkörperexponent n hängt vom Modell ab und steht im Datenblatt des Herstellers. Üblich sind etwa 1,25 bis 1,35, als Standard ist 1,3 eingestellt. Mit n = 1,3 liefert ein Heizkörper bei 55/45/20 °C rund 51 % seiner Normleistung.</p>
     </div>
   </div>
 </div>
