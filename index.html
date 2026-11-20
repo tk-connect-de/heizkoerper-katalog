@@ -781,10 +781,11 @@ HK_BOOT.push(function(){
 <div id="login" hidden>
   <form class="lgcard" id="lgform" autocomplete="on" novalidate>
     <div class="lghead">
-      <span class="brandwrap"><svg class="logo" role="img" aria-label="tk.connect"><use href="#tklogo"/></svg><span class="bsep" aria-hidden="true"></span><span class="brand">Heizkörper<b>Katalog</b></span></span>
+      <svg class="logo" role="img" aria-label="tk.connect"><use href="#tklogo"/></svg>
+      <span class="brand">Heizkörper<b>Katalog</b></span>
     </div>
     <h2>Anmelden</h2>
-    <p class="lgsub">Melde dich mit deinem Zugang an, um den Katalog zu öffnen.</p>
+    <p class="lgsub">Melde dich an, um den Katalog zu öffnen.</p>
     <div class="fld">
       <label class="lbl" for="lgmail">E-Mail</label>
       <input id="lgmail" name="email" type="email" autocomplete="username" placeholder="name@firma.de" required>
@@ -807,10 +808,10 @@ HK_BOOT.push(function(){
   #login{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto;background:linear-gradient(160deg,#f5f9ff 0%,#dce9fb 55%,#b9d1f3 100%)}
   @media (prefers-color-scheme: dark){ #login{background:linear-gradient(160deg,#0b1424 0%,#0f2140 60%,#16325e 100%)} }
   .lgcard{width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);border-radius:28px;padding:30px 30px 26px;box-shadow:var(--shadow);display:flex;flex-direction:column;animation:rise .25s ease}
-  .lghead{padding-bottom:20px;margin-bottom:22px;border-bottom:1px solid var(--line)}
-  .lghead .brandwrap{--lh:46px}
-  .lghead .logo{margin-left:-3px}
-  .lghead .brand{font-size:17px}
+  .lghead{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:4px 0 22px;margin-bottom:24px;border-bottom:1px solid var(--line)}
+  .lghead .logo{height:72px;margin:0}
+  .lghead .brand{font-size:19px;letter-spacing:.02em;line-height:1}
+  .lgcard h2,.lgsub{text-align:center}
   .lgcard h2{font-size:28px;font-weight:300;letter-spacing:-.02em;margin:0 0 6px;color:var(--ink)}
   .lgsub{color:var(--muted);font-size:14px;line-height:1.5;margin:0 0 20px}
   .fld{display:flex;flex-direction:column;margin-bottom:14px}
@@ -829,9 +830,9 @@ HK_BOOT.push(function(){
   .lgbtn i{font-style:normal;transition:transform .15s}
   .lgbtn:hover:not(:disabled) i{transform:translateX(3px)}
   .lgbtn:disabled{opacity:.65;cursor:wait}
-  .lghint{display:flex;gap:8px;align-items:flex-start;color:var(--muted);font-size:12px;line-height:1.5;margin:18px 0 0}
-  .lghint svg{width:14px;height:14px;flex:none;margin-top:2px}
-  @media (max-width:480px){ .lgcard{padding:24px 20px 22px;border-radius:24px} .lghead .brandwrap{--lh:40px} .lghead .brand{font-size:15px} }
+  .lghint{color:var(--muted);font-size:12px;line-height:1.55;margin:18px 0 0;text-align:center;text-wrap:balance}
+  .lghint svg{width:13px;height:13px;vertical-align:-2px;margin-right:6px}
+  @media (max-width:480px){ .lgcard{padding:24px 20px 22px;border-radius:24px} .lghead .logo{height:60px} .lghead .brand{font-size:17px} }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o" crossorigin="anonymous"></script>
 <script>
