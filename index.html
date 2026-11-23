@@ -97,6 +97,7 @@
   .summary{margin:14px 4px 0;color:var(--muted);font-size:14px;min-height:22px}
   .row{display:flex;gap:8px;margin-top:10px}
   button{font:inherit;cursor:pointer}
+  .ghost:disabled{opacity:.45;cursor:not-allowed}
   .ghost{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:8px 16px;font-size:14px;transition:border-color .15s,background .15s}
   .ghost.ok{border-color:var(--accent);color:var(--accent)}
   .ft{margin-top:72px;padding:22px 4px 8px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
@@ -588,13 +589,17 @@ HK_BOOT.push(function(){
       var mode = 1, inp = $('gl'), bl = $('bl'), tl = $('tl');
       function num(el){ return parseFloat(String(el.value).replace(',','.')) || 0; }
       function teil(){ var t = num(tl); return (t > 0 && t < 10) ? t * 10 : t; }
+      var GMAX = 200;   /* mehr Glieder hat kein realer Heizkörper */
       function count(){
-        if(mode === 1) return Math.max(1, parseInt(inp.value,10) || 0);
-        var t = teil(), l = num(bl); return (t > 0 && l > 0) ? Math.max(1, Math.round(l / t)) : 0;
+        var n;
+        if(mode === 1){ n = Number(String(inp.value).trim()); if(!Number.isInteger(n)) return 0; }
+        else { var t = teil(), l = num(bl); n = (t > 0 && l > 0) ? Math.round(l / t) : 0; }
+        return (n >= 1 && n <= GMAX) ? n : 0;
       }
       function upd(){
         var n = count();
-        if(!n){ $('glres').textContent = 'Bitte Werte eingeben'; return 0; }
+        if(!n){ $('glres').textContent = mode === 1 ? 'Bitte eine ganze Zahl von 1 bis ' + GMAX + ' eingeben' : 'Bitte Baulänge und Teilung eingeben (ergibt 1 bis ' + GMAX + ' Glieder)'; $('glok').disabled = true; return 0; }
+        $('glok').disabled = false;
         var pre = mode === 2 ? String(num(bl)).replace('.', ',') + ' mm ÷ ' + String(teil()).replace('.', ',') + ' mm = ' + n + ' Glieder · ' : '';
         $('glres').textContent = pre + fmt(cvG(sel.wGlied)) + ' W × ' + n + ' = ' + fmtE(cvT(Math.round(sel.wGlied * n * 10) / 10)) + ' W' + (cfg.bed === 'norm' ? '' : ' bei ' + BED[cfg.bed].t);
         return n;
@@ -703,6 +708,8 @@ HK_BOOT.push(function(){
     if(step==='laenge' || step==='breite' || step==='merkmal') delete sel.hoehe;
     if(step==='glieder'){ delete sel.merk; delete sel.wGlied; delete sel.baulaenge; delete sel.teilung; }
     step = prev; render();
+    /* Zeichnung rechts auf den Stand nach dem Zurueckgehen bringen */
+    document.dispatchEvent(new CustomEvent('heizkoerper:schritt', {detail: sel.kat ? sel : null}));
   });
   $('reset').addEventListener('click', function(e){ e.stopPropagation(); $('watt').value=''; delete $('watt').dataset.value; $('summary').textContent=''; $('bedinfo').textContent=''; delete $('watt').dataset.norm; last = null; $('reset').hidden=true; $('cpyW').hidden=true; $('ctatx').textContent='Heizkörper wählen'; });
   /* Kopier-Symbol im Ergebnisfeld: kopiert nur die Watt-Zahl */
@@ -1099,7 +1106,7 @@ HK_BOOT.push(function(){
   sb.auth.getSession().then(function(r){
     if(r.data && r.data.session) return laden().catch(function(){ zeigeLogin('Daten konnten nicht geladen werden. Bitte neu anmelden.'); });
     zeigeLogin();
-  });
+  }).catch(function(){ zeigeLogin('Keine Verbindung zum Server. Bitte Internetverbindung prüfen.'); });
 
   form.addEventListener('submit', function(e){
     e.preventDefault();
@@ -1110,10 +1117,13 @@ HK_BOOT.push(function(){
       document.getElementById('lgpw').value = '';
       if(r.error){ zeigeLogin('Anmeldung fehlgeschlagen. Bitte E-Mail und Passwort prüfen.'); return; }
       return laden().catch(function(){ zeigeLogin('Angemeldet, aber keine Freigabe für die Daten.'); });
-    });
+    }).catch(function(){ document.getElementById('lgpw').value = ''; zeigeLogin('Keine Verbindung zum Server. Bitte erneut versuchen.'); });
   });
 
-  out.addEventListener('click', function(){ sb.auth.signOut().then(function(){ location.reload(); }); });
+  /* Abmelden: auch ohne Verbindung lokal abmelden und neu laden */
+  out.addEventListener('click', function(){
+    sb.auth.signOut().catch(function(){ return sb.auth.signOut({ scope: 'local' }); }).catch(function(){}).then(function(){ location.reload(); });
+  });
 })();
 </script>
 </body>
