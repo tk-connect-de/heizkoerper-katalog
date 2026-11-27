@@ -960,6 +960,16 @@ HK_BOOT.push(function(){
     } else if(kind==='rohr'){
       var n=opt.n||3, d=Math.max(3,(w-(n-1))/n);
       for(i=0;i<n;i++) s+=bar(Math.round((xl+i*(d+1))*10)/10, Math.round(d*10)/10, SY0, SY1);
+    } else if(kind==='bad'){
+      /* Handtuchheizkoerper Therm Direct: senkrechtes D-Profil 30 x 40 mm (Buderus Katalog Teil 5),
+         Seitenansicht = flache Rueckseite zur Wand, runde Vorderseite. Gleicher Massstab wie Flachheizkoerper. */
+      w=Math.round(mm*0.42); xr=xl+w;
+      var r2=w/2, wx2=xl-14;
+      s='<line class="thin" x1="'+wx2+'" y1="'+(SY0-8)+'" x2="'+wx2+'" y2="'+(SY1+8)+'" stroke-width="3" opacity=".35"/>';
+      [SY0+30, SY1-30].forEach(function(y){ s+='<path class="thin" d="M'+wx2+' '+y+' H'+xl+' M'+(xl-5)+' '+(y-5)+' V'+(y+5)+'" opacity=".7"/>'; });
+      s+='<path class="body" style="stroke-width:1.6" d="M'+xl+' '+(SY0+r2)+' A'+r2+' '+r2+' 0 0 1 '+xr+' '+(SY0+r2)+' V'+(SY1-r2)+' A'+r2+' '+r2+' 0 0 1 '+xl+' '+(SY1-r2)+' Z"/>';
+      s+='<line class="thin" x1="'+(xl+3)+'" y1="'+(SY0+r2)+'" x2="'+(xl+3)+'" y2="'+(SY1-r2)+'" opacity=".35"/>';
+      s+='<line class="thin" x1="'+(xl+w/2)+'" y1="'+SY1+'" x2="'+(xl+w/2)+'" y2="'+(SY1+8)+'"/>';
     } else {
       s+=bar(xl, w, SY0, SY1);
       if(kind==='guss' && w>14) s+='<line class="thin" x1="'+(xl+w/2)+'" y1="'+(SY0+10)+'" x2="'+(xl+w/2)+'" y2="'+(SY1-10)+'" opacity=".4"/>';
@@ -983,7 +993,7 @@ HK_BOOT.push(function(){
     } else if(k.id==='stahlradiator'){
       schnitt('stahl', mm||160, {zeigen:!!mm});
     } else {
-      schnitt('bad', 40, {y0:70, y1:288});
+      schnitt('bad', 40, {y0:70, y1:288, zeigen:true});   /* Therm Direct: immer 40 mm tief */
     }
     var h = sel.hoehe ? 'Höhe '+sel.hoehe : 'Höhe', L;
     if(k.id==='badheizkoerper') L = sel.breite ? 'Breite '+sel.breite : 'Breite';
