@@ -175,7 +175,8 @@
   @keyframes rise{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
   .dlg-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
   .dlg-head h2{font-size:26px;font-weight:300;letter-spacing:-.02em;margin:0;flex:1}
-  .x{background:var(--soft);border:0;width:38px;height:38px;border-radius:50%;font-size:22px;line-height:1;color:var(--ink);transition:background .15s}
+  .x{background:var(--soft);border:0;width:38px;height:38px;padding:0;border-radius:50%;display:grid;place-items:center;flex:none;color:var(--ink);cursor:pointer;transition:background .15s}
+  .x svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
   .x:hover{background:var(--accent);color:var(--on-accent)}
   .crumbs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 16px;min-height:4px}
   .crumb{font-size:12px;background:var(--soft);color:var(--accent);border-radius:99px;padding:4px 12px;font-weight:600}
@@ -343,7 +344,7 @@
   <div class="dlg">
     <div class="dlg-head">
       <h2 id="dlgTitle">Heizkörper wählen</h2>
-      <button class="x" id="close" type="button" aria-label="Schließen">×</button>
+      <button class="x" id="close" type="button" aria-label="Schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button>
     </div>
     <div class="crumbs" id="crumbs"></div>
     <button class="ghost back" id="back" type="button" hidden>← Zurück</button>
@@ -772,7 +773,7 @@ HK_BOOT.push(function(){
 </script>
 <div class="overlay" id="info" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
   <div class="dlg">
-    <div class="dlg-head"><h2 id="infoTitle">DIN EN 442</h2><button class="x" id="infoClose" type="button" aria-label="Schließen">×</button></div>
+    <div class="dlg-head"><h2 id="infoTitle">DIN EN 442</h2><button class="x" id="infoClose" type="button" aria-label="Schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
     <div class="info">
       <p class="lead2">Die europäische Norm für Heizkörper. Sie legt fest, wie die Wärmeleistung eines Heizkörpers gemessen wird, damit Werte verschiedener Hersteller vergleichbar sind.</p>
       <div class="v-norm">
@@ -1038,7 +1039,7 @@ HK_BOOT.push(function(){
     </div>
     <p class="lgerr" id="lgerr" role="alert"></p>
     <button class="lgbtn" id="lgbtn" type="submit"><span id="lgbtntx">Anmelden</span> <i aria-hidden="true">→</i></button>
-    <p class="lghint"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="3" y="7" width="10" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Geschützter Bereich. Kein Zugang oder Passwort vergessen? Bitte beim Administrator melden.</p>
+    <p class="lghint"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="3" y="7" width="10" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Geschützter Bereich</p>
     <p class="lglinks"><a href="impressum.html">Impressum</a><span aria-hidden="true">·</span><a href="datenschutz.html">Datenschutz</a></p>
   </form>
 </div>
